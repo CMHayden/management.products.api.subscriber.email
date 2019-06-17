@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+
 
 class ProductsController extends SNSController
 {
@@ -14,12 +16,22 @@ class ProductsController extends SNSController
             return $this->subscribe($requestJSON);
         }
 
-        $text_message = $requestJSON['Message'];
+        $message = $requestJSON['Message'];
 
         $this->sendEmail($email, $message);
     }
 
-    public function sendEmail($email, $message) {
+    public function sendEmail($email, $email_message) {
+
+        $data = [
+            'title' => 'SNS Notification',
+            'content' => "$email_message"
+        ];
+
+        Mail::send('emails.test', $data, function($message) use($email)
+        {
+            $message->to("$email", 'Name')->subject('SNSnotification');
+        });
 
         return app('Illuminate\Http\Response')->status();
     }
