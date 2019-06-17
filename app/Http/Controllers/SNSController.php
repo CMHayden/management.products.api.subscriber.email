@@ -7,20 +7,6 @@ use Log;
 
 class SNSController extends Controller
 {
-    public function handleRequest(Request $request) {
-
-        Log::info('Inside handleRequest');
-        $requestJSON =  json_decode($request->getContent(), true);
-
-        if ($requestJSON['Type']  == 'SubscriptionConfirmation') {
-
-            return $this->subscribe($requestJSON);
-
-        }
-
-        $this->handleNotification($requestJSON);
-
-    }
 
     private function subscribe($notification) {
 
@@ -36,7 +22,4 @@ class SNSController extends Controller
 
     }
 
-    protected function handleNotification($notification) {
-        //
-    }
 }
