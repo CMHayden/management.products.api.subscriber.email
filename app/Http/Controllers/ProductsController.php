@@ -3,17 +3,24 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Log;
 
 class ProductsController extends SNSController
 {
-    public function handleNotification($notification) {
+    public function handleRequest(Request $request, $email) {
 
-        $guzzleClient = new \GuzzleHttp\Client();
+        $requestJSON =  json_decode($request->getContent(), true);
 
-        $guzzleClient->post("https://enws51kgvayy.x.pipedream.net/", ['body' => json_encode($notification)]);
+        if ($requestJSON['Type']  == 'SubscriptionConfirmation') {
+            return $this->subscribe($requestJSON);
+        }
+
+        $text_message = $requestJSON['Message'];
+
+        $this->sendEmail($email, $message);
+    }
+
+    public function sendEmail($email, $message) {
 
         return app('Illuminate\Http\Response')->status();
-
     }
 }
