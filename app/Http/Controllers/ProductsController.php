@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Mailgun\Mailgun;
 
 
 class ProductsController extends SNSController
@@ -23,15 +24,15 @@ class ProductsController extends SNSController
 
     public function sendEmail($email, $email_message) {
 
-        $data = [
-            'title' => 'SNS Notification',
-            'content' => "$email_message"
-        ];
+        $mg = Mailgun::create(env('MAILGUN_SECRET'));
+        $from = env('MAIL_FROM_ADDRESS');
 
-        Mail::send('emails.test', $data, function($message) use($email)
-        {
-            $message->to("$email", 'Name')->subject('SNSnotification');
-        });
+        $mg->messages()->send(env('MAILGUN_DOMAIN'), [
+            'from'    => "SNS BOT <$from>",
+            'to'      => "<$email>",
+            'subject' => 'SNS Notification',
+            'text'    => "$email_message"
+        ]);
 
         return app('Illuminate\Http\Response')->status();
     }
