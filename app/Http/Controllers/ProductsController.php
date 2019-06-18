@@ -3,17 +3,37 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Log;
+use Illuminate\Support\Facades\Mail;
+use Mailgun\Mailgun;
+
 
 class ProductsController extends SNSController
 {
-    public function handleNotification($notification) {
+    public function handleRequest(Request $request, $email) {
 
-        $guzzleClient = new \GuzzleHttp\Client();
+        $requestJSON =  json_decode($request->getContent(), true);
 
-        $guzzleClient->post("https://enws51kgvayy.x.pipedream.net/", ['body' => json_encode($notification)]);
+        if ($requestJSON['Type']  == 'SubscriptionConfirmation') {
+            return $this->subscribe($requestJSON);
+        }
+
+        $message = $requestJSON['Message'];
+
+        $this->sendEmail($email, $message);
+    }
+
+    public function sendEmail($email, $email_message) {
+
+        $mg = Mailgun::create(env('MAILGUN_SECRET'));
+        $from = env('MAIL_FROM_ADDRESS');
+
+        $mg->messages()->send(env('MAILGUN_DOMAIN'), [
+            'from'    => "SNS BOT <$from>",
+            'to'      => "<$email>",
+            'subject' => 'SNS Notification',
+            'text'    => "$email_message"
+        ]);
 
         return app('Illuminate\Http\Response')->status();
-
     }
 }
